@@ -1,0 +1,70 @@
+<div class="grid" style="gap: 24px;">
+  <section class="card">
+    <div class="toolbar">
+      <h2 class="section-title">Create runbook</h2>
+      <span class="muted">Title and content required</span>
+    </div>
+    <form class="grid" (ngSubmit)="createRunbook()">
+      <div>
+        <label for="runbook-title">Title</label>
+        <input id="runbook-title" name="title" [(ngModel)]="formState.title" required data-testid="runbook-create-title" />
+      </div>
+      <div>
+        <label for="runbook-tags">Tags (comma-separated)</label>
+        <input id="runbook-tags" name="tags" [(ngModel)]="formState.tags" data-testid="runbook-create-tags" />
+      </div>
+      <div>
+        <label for="runbook-content">Content</label>
+        <textarea
+          id="runbook-content"
+          name="content"
+          [(ngModel)]="formState.content"
+          required
+          data-testid="runbook-create-content"
+        ></textarea>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" data-testid="runbook-create-submit">Create runbook</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <h2 class="section-title">Runbooks</h2>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <label for="runbook-search">Search</label>
+      <input
+        id="runbook-search"
+        name="search"
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+        placeholder="Search by title or tag"
+        data-testid="runbook-search"
+      />
+    </div>
+
+    <div *ngIf="filtered.length === 0" class="empty-state" data-testid="runbooks-empty">
+      No runbooks match your search. Add a new runbook to get started.
+    </div>
+
+    <div data-testid="runbook-list">
+      <div class="list-item" *ngFor="let runbook of filtered" [attr.data-testid]="'runbook-item-' + runbook.id">
+        <div>
+          <div style="font-weight: 700;">
+            <a [routerLink]="['/runbooks', runbook.id]">{{ runbook.title }}</a>
+          </div>
+          <div class="muted">Updated {{ runbook.updatedAt | date: 'short' }}</div>
+          <div>
+            <span class="tag" *ngFor="let tag of runbook.tags">{{ tag }}</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="secondary" type="button" [routerLink]="['/runbooks', runbook.id]">View</button>
+          <button class="danger" type="button" (click)="deleteRunbook(runbook.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

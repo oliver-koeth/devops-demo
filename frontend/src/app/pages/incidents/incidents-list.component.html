@@ -1,0 +1,138 @@
+<div class="grid" style="gap: 24px;">
+  <section class="card">
+    <div class="toolbar">
+      <h2 class="section-title">Create incident</h2>
+      <span class="muted">All fields required</span>
+    </div>
+    <form class="grid grid-2" (ngSubmit)="createIncident()">
+      <div>
+        <label for="incident-title">Title</label>
+        <input
+          id="incident-title"
+          name="title"
+          [(ngModel)]="formState.title"
+          required
+          data-testid="incident-create-title"
+        />
+      </div>
+      <div>
+        <label for="incident-service">Service</label>
+        <input
+          id="incident-service"
+          name="service"
+          [(ngModel)]="formState.service"
+          required
+          data-testid="incident-create-service"
+        />
+      </div>
+      <div>
+        <label for="incident-severity">Severity</label>
+        <select
+          id="incident-severity"
+          name="severity"
+          [(ngModel)]="formState.severity"
+          data-testid="incident-create-severity"
+        >
+          <option value="P1">P1</option>
+          <option value="P2">P2</option>
+          <option value="P3">P3</option>
+          <option value="P4">P4</option>
+        </select>
+      </div>
+      <div>
+        <label for="incident-status">Status</label>
+        <select
+          id="incident-status"
+          name="status"
+          [(ngModel)]="formState.status"
+          data-testid="incident-create-status"
+        >
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" data-testid="incident-create-submit">Create incident</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <h2 class="section-title">Incidents</h2>
+      <div class="actions">
+        <button class="secondary" type="button" (click)="resetFilters()" data-testid="incident-reset-filters">
+          Reset filters
+        </button>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-bottom: 16px;">
+      <div>
+        <label for="incident-search">Search</label>
+        <input
+          id="incident-search"
+          name="search"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilters()"
+          placeholder="Search title or service"
+          data-testid="incident-search"
+        />
+      </div>
+      <div>
+        <label for="incident-status-filter">Status</label>
+        <select
+          id="incident-status-filter"
+          name="statusFilter"
+          [(ngModel)]="statusFilter"
+          (change)="applyFilters()"
+          data-testid="incident-status-filter"
+        >
+          <option value="All">All</option>
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+      <div>
+        <label for="incident-severity-filter">Severity</label>
+        <select
+          id="incident-severity-filter"
+          name="severityFilter"
+          [(ngModel)]="severityFilter"
+          (change)="applyFilters()"
+          data-testid="incident-severity-filter"
+        >
+          <option value="All">All</option>
+          <option value="P1">P1</option>
+          <option value="P2">P2</option>
+          <option value="P3">P3</option>
+          <option value="P4">P4</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="filtered.length === 0" class="empty-state" data-testid="incidents-empty">
+      No incidents match your filters. Try adjusting the search or create a new incident.
+    </div>
+
+    <div data-testid="incident-list">
+      <div
+        class="list-item"
+        *ngFor="let incident of filtered"
+        [attr.data-testid]="'incident-item-' + incident.id"
+      >
+        <div>
+          <div style="font-weight: 700;">
+            <a [routerLink]="['/incidents', incident.id]">{{ incident.title }}</a>
+          </div>
+          <div class="muted">{{ incident.service }} · Updated {{ incident.updatedAt | date: 'short' }}</div>
+        </div>
+        <div class="actions">
+          <span class="badge" [ngClass]="incident.severity.toLowerCase()">{{ incident.severity }}</span>
+          <span class="badge" [ngClass]="incident.status.toLowerCase()">{{ incident.status }}</span>
+          <button class="secondary" type="button" [routerLink]="['/incidents', incident.id]">View</button>
+          <button class="danger" type="button" (click)="deleteIncident(incident.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
