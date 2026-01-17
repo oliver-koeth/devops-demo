@@ -126,9 +126,11 @@
           </div>
           <div class="muted">{{ incident.service }} · Updated {{ incident.updatedAt | date: 'short' }}</div>
         </div>
-        <div class="actions">
-          <span class="badge" [ngClass]="incident.severity.toLowerCase()">{{ incident.severity }}</span>
-          <span class="badge" [ngClass]="incident.status.toLowerCase()">{{ incident.status }}</span>
+        <div class="actions incident-actions">
+          <div class="badge-group">
+            <span class="badge" [ngClass]="incident.status.toLowerCase()">{{ incident.status }}</span>
+            <span class="badge" [ngClass]="incident.severity.toLowerCase()">{{ incident.severity }}</span>
+          </div>
           <button class="secondary" type="button" [routerLink]="['/incidents', incident.id]">View</button>
           <button class="danger" type="button" (click)="deleteIncident(incident.id)">Delete</button>
         </div>
