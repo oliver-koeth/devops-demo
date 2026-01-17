@@ -8,6 +8,8 @@ This repository contains a staged demo application. The current stage delivers a
 - localStorage persistence with schema versioning and seed data.
 - Playwright E2E tests for core workflows.
 
+Stage 2 is complete, and the codebase is organized to transition into Stage 3 without introducing backend behavior early.
+
 ## Out of Scope (Not Yet Implemented)
 - Python backend service (Stage 3).
 - MCP server and ChatGPT-native integration (Stages 4/5).

@@ -27,6 +27,7 @@ test('incident persists after reload', async ({ page }) => {
   await page.getByTestId('incident-create-service').fill('Edge Cache');
   await page.getByTestId('incident-create-submit').click();
 
+  await expect(page.getByTestId('incident-detail-title')).toHaveText('Cache miss spike');
   await page.reload();
   await page.getByTestId('incident-back').click();
 
@@ -44,7 +45,8 @@ test('can create a runbook and see it after reload', async ({ page }) => {
   await expect(page.getByTestId('runbook-detail-title')).toHaveText('Service degradation response');
 
   await page.reload();
-  await page.getByText('Back to list').click();
+  await expect(page.getByTestId('runbook-detail-title')).toHaveText('Service degradation response');
+  await page.getByTestId('runbook-back').click();
 
   await expect(page.getByTestId('runbook-list')).toContainText('Service degradation response');
 });
