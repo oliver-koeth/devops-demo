@@ -1,0 +1,49 @@
+<section *ngIf="runbook; else notFound" class="grid" style="gap: 24px;">
+  <div class="card">
+    <div class="toolbar">
+      <div>
+        <h2 class="section-title" data-testid="runbook-detail-title">{{ runbook.title }}</h2>
+        <div class="muted">ID: {{ runbook.id }}</div>
+      </div>
+      <div class="actions">
+        <button class="danger" type="button" (click)="deleteRunbook()" data-testid="runbook-delete">Delete</button>
+      </div>
+    </div>
+
+    <div style="margin-top: 12px;">
+      <div>
+        <span class="tag" *ngFor="let tag of runbook.tags">{{ tag }}</span>
+      </div>
+      <div class="muted">Updated {{ runbook.updatedAt | date: 'short' }}</div>
+      <pre style="white-space: pre-wrap; margin-top: 16px;">{{ runbook.content }}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="section-title">Edit runbook</h3>
+    <form *ngIf="editState" class="grid" (ngSubmit)="saveChanges()">
+      <div>
+        <label for="edit-title">Title</label>
+        <input id="edit-title" name="editTitle" [(ngModel)]="editState.title" required />
+      </div>
+      <div>
+        <label for="edit-tags">Tags (comma-separated)</label>
+        <input id="edit-tags" name="editTags" [(ngModel)]="editState.tags" />
+      </div>
+      <div>
+        <label for="edit-content">Content</label>
+        <textarea id="edit-content" name="editContent" [(ngModel)]="editState.content" required></textarea>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" data-testid="runbook-save">Save changes</button>
+        <a class="secondary" [routerLink]="['/runbooks']">Back to list</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<ng-template #notFound>
+  <div class="card empty-state">
+    Runbook not found. <a routerLink="/runbooks">Return to list</a>.
+  </div>
+</ng-template>

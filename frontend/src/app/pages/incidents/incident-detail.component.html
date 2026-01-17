@@ -1,0 +1,104 @@
+<section *ngIf="incident; else notFound" class="grid" style="gap: 24px;">
+  <div class="card">
+    <div class="toolbar">
+      <div>
+        <h2 class="section-title" data-testid="incident-detail-title">{{ incident.title }}</h2>
+        <div class="muted">ID: {{ incident.id }}</div>
+      </div>
+      <div class="actions">
+        <button class="secondary" type="button" (click)="toggleStatus()" data-testid="incident-toggle-status">
+          {{ incident.status === 'Open' ? 'Close incident' : 'Reopen incident' }}
+        </button>
+        <button class="danger" type="button" (click)="deleteIncident()" data-testid="incident-delete">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top: 12px;">
+      <div>
+        <label>Severity</label>
+        <div class="badge" [ngClass]="incident.severity.toLowerCase()">{{ incident.severity }}</div>
+      </div>
+      <div>
+        <label>Status</label>
+        <div class="badge" [ngClass]="incident.status.toLowerCase()">{{ incident.status }}</div>
+      </div>
+      <div>
+        <label>Service</label>
+        <div>{{ incident.service }}</div>
+      </div>
+      <div>
+        <label>Last updated</label>
+        <div>{{ incident.updatedAt | date: 'short' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="section-title">Edit incident</h3>
+    <form *ngIf="editState" class="grid grid-2" (ngSubmit)="saveChanges()">
+      <div>
+        <label for="edit-title">Title</label>
+        <input id="edit-title" name="editTitle" [(ngModel)]="editState.title" required />
+      </div>
+      <div>
+        <label for="edit-service">Service</label>
+        <input id="edit-service" name="editService" [(ngModel)]="editState.service" required />
+      </div>
+      <div>
+        <label for="edit-severity">Severity</label>
+        <select id="edit-severity" name="editSeverity" [(ngModel)]="editState.severity">
+          <option value="P1">P1</option>
+          <option value="P2">P2</option>
+          <option value="P3">P3</option>
+          <option value="P4">P4</option>
+        </select>
+      </div>
+      <div>
+        <label for="edit-status">Status</label>
+        <select id="edit-status" name="editStatus" [(ngModel)]="editState.status">
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" data-testid="incident-save">Save changes</button>
+        <a class="secondary" [routerLink]="['/incidents']" data-testid="incident-back">Back to list</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 class="section-title">Add note</h3>
+    <form class="grid" (ngSubmit)="addNote()">
+      <div>
+        <label for="note-author">Author</label>
+        <input id="note-author" name="noteAuthor" [(ngModel)]="noteAuthor" required />
+      </div>
+      <div>
+        <label for="note-text">Note</label>
+        <textarea id="note-text" name="noteText" [(ngModel)]="noteText" required></textarea>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit" data-testid="incident-add-note">Add note</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 class="section-title">Timeline</h3>
+    <div *ngIf="incident.notes.length === 0" class="empty-state">No notes yet.</div>
+    <div *ngFor="let note of incident.notes; trackBy: trackByTimestamp" class="note">
+      <div style="font-weight: 600;">{{ note.author }}</div>
+      <div class="muted">{{ note.timestamp | date: 'short' }}</div>
+      <p>{{ note.text }}</p>
+    </div>
+  </div>
+</section>
+
+<ng-template #notFound>
+  <div class="card empty-state">
+    Incident not found. <a routerLink="/incidents">Return to list</a>.
+  </div>
+</ng-template>
