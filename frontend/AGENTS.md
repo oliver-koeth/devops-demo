@@ -1,14 +1,14 @@
 # Frontend Stage Guidance
 
-This directory is **Stage 2** for the demo application. Frontend code may be created here to implement the Angular MVP described in the active task.
+This directory is **Stage 3** for the demo application. The frontend remains an Angular MVP, but now relies on the backend API for persistence.
 
 ## Scope
-- Implement the standalone Angular frontend with localStorage persistence.
-- Follow the staged roadmap: no backend, MCP server, or deployment tooling.
+- Implement the standalone Angular frontend that calls the FastAPI backend.
+- Follow the staged roadmap: no MCP server or deployment tooling.
 
 ## Expectations
 - Keep changes scoped to frontend MVP needs.
 - Use standalone components and Angular router.
 - Favor small, readable services for data access.
 
-If a request would add backend services or MCP functionality, stop and flag the conflict.
+If a request would add MCP functionality, stop and flag the conflict.

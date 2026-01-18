@@ -9,14 +9,19 @@ This repository is being built in **small, staged steps**. All contributors (inc
 - If unsure, add a short note to `docs/` rather than writing code.
 
 ## Stage Discipline
-- **Stage 2 (current)**: Angular frontend MVP with localStorage persistence (see `frontend/` scope guidance).
-- Stage 3 will add a Python backend and remove localStorage.
-- Stage 4/5 will add MCP server + ChatGPT-native integration.
+- **Stage 3 (current)**: Angular frontend backed by a FastAPI service with file-based persistence.
+- Stage 4/5 will add an MCP server + ChatGPT-native integration.
 - If a request conflicts with the current stage, flag it clearly and stop.
 
 ## Stage Extensions
-- For Stage 3+, avoid backend or MCP work unless explicitly requested.
+- For Stage 4+, avoid MCP work unless explicitly requested.
 - Prefer to extend documentation in `docs/` when uncertain.
+
+## Backend Conventions (Stage 3)
+- Keep routers thin; no direct file writes from API routes.
+- Use services + persistence abstractions for business logic.
+- Use Pydantic models for all input/output schemas.
+- Keep API versioning under `/api/v1`.
 
 ## Output Expectations
 - Keep repository changes clean and professional.

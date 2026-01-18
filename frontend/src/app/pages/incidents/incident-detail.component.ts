@@ -40,15 +40,21 @@ export class IncidentDetailComponent implements OnInit {
   }
 
   loadIncident(id: string): void {
-    this.incident = this.incidentsService.getIncidentById(id);
-    if (this.incident) {
-      this.editState = {
-        title: this.incident.title,
-        service: this.incident.service,
-        severity: this.incident.severity,
-        status: this.incident.status
-      };
-    }
+    this.incidentsService.getIncidentById(id).subscribe({
+      next: (incident) => {
+        this.incident = incident;
+        this.editState = {
+          title: incident.title,
+          service: incident.service,
+          severity: incident.severity,
+          status: incident.status
+        };
+      },
+      error: () => {
+        this.incident = undefined;
+        this.editState = undefined;
+      }
+    });
   }
 
   saveChanges(): void {
@@ -58,43 +64,44 @@ export class IncidentDetailComponent implements OnInit {
     if (!this.editState.title.trim() || !this.editState.service.trim()) {
       return;
     }
-    const updated = this.incidentsService.updateIncident(this.incident.id, {
-      title: this.editState.title.trim(),
-      service: this.editState.service.trim(),
-      severity: this.editState.severity,
-      status: this.editState.status
-    });
-    if (updated) {
-      this.incident = updated;
-    }
+    this.incidentsService
+      .updateIncident(this.incident.id, {
+        title: this.editState.title.trim(),
+        service: this.editState.service.trim(),
+        severity: this.editState.severity,
+        status: this.editState.status
+      })
+      .subscribe((updated) => {
+        this.incident = updated;
+      });
   }
 
   toggleStatus(): void {
     if (!this.incident) {
       return;
     }
-    const updated = this.incidentsService.toggleStatus(this.incident.id);
-    if (updated) {
+    this.incidentsService.toggleStatus(this.incident.id, this.incident.status).subscribe((updated) => {
       this.incident = updated;
       if (this.editState) {
         this.editState.status = updated.status;
       }
-    }
+    });
   }
 
   addNote(): void {
     if (!this.incident || !this.noteAuthor.trim() || !this.noteText.trim()) {
       return;
     }
-    const updated = this.incidentsService.addNote(this.incident.id, {
-      author: this.noteAuthor.trim(),
-      text: this.noteText.trim()
-    });
-    if (updated) {
-      this.incident = updated;
-      this.noteAuthor = '';
-      this.noteText = '';
-    }
+    this.incidentsService
+      .addNote(this.incident.id, {
+        author: this.noteAuthor.trim(),
+        text: this.noteText.trim()
+      })
+      .subscribe((updated) => {
+        this.incident = updated;
+        this.noteAuthor = '';
+        this.noteText = '';
+      });
   }
 
   deleteIncident(): void {
@@ -105,8 +112,9 @@ export class IncidentDetailComponent implements OnInit {
     if (!confirmDelete) {
       return;
     }
-    this.incidentsService.deleteIncident(this.incident.id);
-    void this.router.navigate(['/incidents']);
+    this.incidentsService.deleteIncident(this.incident.id).subscribe(() => {
+      void this.router.navigate(['/incidents']);
+    });
   }
 
   trackByTimestamp(_: number, note: IncidentNote): string {

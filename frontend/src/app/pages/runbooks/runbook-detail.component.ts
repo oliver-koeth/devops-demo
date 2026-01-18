@@ -33,14 +33,20 @@ export class RunbookDetailComponent implements OnInit {
   }
 
   loadRunbook(id: string): void {
-    this.runbook = this.runbooksService.getRunbookById(id);
-    if (this.runbook) {
-      this.editState = {
-        title: this.runbook.title,
-        tags: this.runbook.tags.join(', '),
-        content: this.runbook.content
-      };
-    }
+    this.runbooksService.getRunbookById(id).subscribe({
+      next: (runbook) => {
+        this.runbook = runbook;
+        this.editState = {
+          title: runbook.title,
+          tags: runbook.tags.join(', '),
+          content: runbook.content
+        };
+      },
+      error: () => {
+        this.runbook = undefined;
+        this.editState = undefined;
+      }
+    });
   }
 
   saveChanges(): void {
@@ -54,17 +60,18 @@ export class RunbookDetailComponent implements OnInit {
       .split(',')
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0);
-    const updated = this.runbooksService.updateRunbook(this.runbook.id, {
-      title: this.editState.title.trim(),
-      tags,
-      content: this.editState.content.trim()
-    });
-    if (updated) {
-      this.runbook = updated;
-      if (this.editState) {
-        this.editState.tags = updated.tags.join(', ');
-      }
-    }
+    this.runbooksService
+      .updateRunbook(this.runbook.id, {
+        title: this.editState.title.trim(),
+        tags,
+        content: this.editState.content.trim()
+      })
+      .subscribe((updated) => {
+        this.runbook = updated;
+        if (this.editState) {
+          this.editState.tags = updated.tags.join(', ');
+        }
+      });
   }
 
   deleteRunbook(): void {
@@ -75,7 +82,8 @@ export class RunbookDetailComponent implements OnInit {
     if (!confirmDelete) {
       return;
     }
-    this.runbooksService.deleteRunbook(this.runbook.id);
-    void this.router.navigate(['/runbooks']);
+    this.runbooksService.deleteRunbook(this.runbook.id).subscribe(() => {
+      void this.router.navigate(['/runbooks']);
+    });
   }
 }
