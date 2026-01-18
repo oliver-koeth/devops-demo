@@ -61,6 +61,13 @@ npm install
 npm run build
 ```
 
+## Frontend Tests (Playwright)
+```bash
+cd frontend
+npm install
+npm run test
+```
+
 ## Staged Development Notes
 - Stage 4/5 will add an MCP server and ChatGPT-native integration.
 - Keep changes incremental and avoid implementing future-stage features early.
