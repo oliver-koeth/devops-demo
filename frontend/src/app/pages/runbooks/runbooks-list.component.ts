@@ -37,8 +37,10 @@ export class RunbooksListComponent implements OnInit {
   }
 
   loadRunbooks(): void {
-    this.runbooks = this.runbooksService.getRunbooks();
-    this.applyFilters();
+    this.runbooksService.getRunbooks().subscribe((runbooks) => {
+      this.runbooks = runbooks;
+      this.applyFilters();
+    });
   }
 
   applyFilters(): void {
@@ -62,14 +64,17 @@ export class RunbooksListComponent implements OnInit {
       .split(',')
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0);
-    const runbook = this.runbooksService.createRunbook({
-      title: this.formState.title.trim(),
-      tags,
-      content: this.formState.content.trim()
-    });
-    this.formState = { title: '', tags: '', content: '' };
-    this.loadRunbooks();
-    void this.router.navigate(['/runbooks', runbook.id]);
+    this.runbooksService
+      .createRunbook({
+        title: this.formState.title.trim(),
+        tags,
+        content: this.formState.content.trim()
+      })
+      .subscribe((runbook) => {
+        this.formState = { title: '', tags: '', content: '' };
+        this.loadRunbooks();
+        void this.router.navigate(['/runbooks', runbook.id]);
+      });
   }
 
   deleteRunbook(id: string): void {
@@ -77,7 +82,6 @@ export class RunbooksListComponent implements OnInit {
     if (!confirmDelete) {
       return;
     }
-    this.runbooksService.deleteRunbook(id);
-    this.loadRunbooks();
+    this.runbooksService.deleteRunbook(id).subscribe(() => this.loadRunbooks());
   }
 }

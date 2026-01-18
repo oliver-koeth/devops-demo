@@ -1,57 +1,36 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../config/api.config';
 import { Runbook } from '../models/runbook.model';
-import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RunbooksService {
-  constructor(private storage: StorageService) {}
+  constructor(private http: HttpClient) {}
 
-  getRunbooks(): Runbook[] {
-    return [...this.storage.getData().runbooks].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  getRunbooks(): Observable<Runbook[]> {
+    return this.http.get<Runbook[]>(`${API_BASE_URL}/runbooks`);
   }
 
-  getRunbookById(id: string): Runbook | undefined {
-    return this.storage.getData().runbooks.find((runbook) => runbook.id === id);
+  getRunbookById(id: string): Observable<Runbook> {
+    return this.http.get<Runbook>(`${API_BASE_URL}/runbooks/${id}`);
   }
 
-  createRunbook(input: { title: string; tags: string[]; content: string }): Runbook {
-    const data = this.storage.getData();
-    const timestamp = new Date().toISOString();
-    const runbook: Runbook = {
-      id: crypto.randomUUID(),
-      title: input.title,
-      tags: input.tags,
-      content: input.content,
-      createdAt: timestamp,
-      updatedAt: timestamp
-    };
-    data.runbooks.unshift(runbook);
-    this.storage.setData(data);
-    return runbook;
+  createRunbook(input: { title: string; tags: string[]; content: string }): Observable<Runbook> {
+    return this.http.post<Runbook>(`${API_BASE_URL}/runbooks`, input);
   }
 
-  updateRunbook(id: string, updates: Partial<Omit<Runbook, 'id' | 'createdAt'>>): Runbook | undefined {
-    const data = this.storage.getData();
-    const index = data.runbooks.findIndex((runbook) => runbook.id === id);
-    if (index === -1) {
-      return undefined;
-    }
-    const updated: Runbook = {
-      ...data.runbooks[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    data.runbooks[index] = updated;
-    this.storage.setData(data);
-    return updated;
+  updateRunbook(
+    id: string,
+    updates: Partial<Omit<Runbook, 'id' | 'createdAt'>>
+  ): Observable<Runbook> {
+    return this.http.put<Runbook>(`${API_BASE_URL}/runbooks/${id}`, updates);
   }
 
-  deleteRunbook(id: string): void {
-    const data = this.storage.getData();
-    data.runbooks = data.runbooks.filter((runbook) => runbook.id !== id);
-    this.storage.setData(data);
+  deleteRunbook(id: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/runbooks/${id}`);
   }
 }

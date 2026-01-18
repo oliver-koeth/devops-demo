@@ -17,6 +17,7 @@ node_modules/
 .env
 .venv/
 __pycache__/
+backend/.tmp/
 
 # Angular / Playwright
 frontend/node_modules/

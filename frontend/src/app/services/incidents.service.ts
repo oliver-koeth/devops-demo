@@ -1,20 +1,22 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../config/api.config';
 import { Incident, IncidentNote, IncidentSeverity, IncidentStatus } from '../models/incident.model';
-import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IncidentsService {
-  constructor(private storage: StorageService) {}
+  constructor(private http: HttpClient) {}
 
-  getIncidents(): Incident[] {
-    return [...this.storage.getData().incidents].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  getIncidents(): Observable<Incident[]> {
+    return this.http.get<Incident[]>(`${API_BASE_URL}/incidents`);
   }
 
-  getIncidentById(id: string): Incident | undefined {
-    return this.storage.getData().incidents.find((incident) => incident.id === id);
+  getIncidentById(id: string): Observable<Incident> {
+    return this.http.get<Incident>(`${API_BASE_URL}/incidents/${id}`);
   }
 
   createIncident(input: {
@@ -22,68 +24,27 @@ export class IncidentsService {
     severity: IncidentSeverity;
     status: IncidentStatus;
     service: string;
-  }): Incident {
-    const data = this.storage.getData();
-    const timestamp = new Date().toISOString();
-    const incident: Incident = {
-      id: crypto.randomUUID(),
-      title: input.title,
-      severity: input.severity,
-      status: input.status,
-      service: input.service,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      notes: []
-    };
-    data.incidents.unshift(incident);
-    this.storage.setData(data);
-    return incident;
+  }): Observable<Incident> {
+    return this.http.post<Incident>(`${API_BASE_URL}/incidents`, input);
   }
 
-  updateIncident(id: string, updates: Partial<Omit<Incident, 'id' | 'createdAt' | 'notes'>>): Incident | undefined {
-    const data = this.storage.getData();
-    const index = data.incidents.findIndex((incident) => incident.id === id);
-    if (index === -1) {
-      return undefined;
-    }
-    const updated: Incident = {
-      ...data.incidents[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    data.incidents[index] = updated;
-    this.storage.setData(data);
-    return updated;
+  updateIncident(
+    id: string,
+    updates: Partial<Omit<Incident, 'id' | 'createdAt' | 'notes'>>
+  ): Observable<Incident> {
+    return this.http.put<Incident>(`${API_BASE_URL}/incidents/${id}`, updates);
   }
 
-  addNote(id: string, note: Omit<IncidentNote, 'timestamp'>): Incident | undefined {
-    const data = this.storage.getData();
-    const incident = data.incidents.find((entry) => entry.id === id);
-    if (!incident) {
-      return undefined;
-    }
-    incident.notes.unshift({
-      ...note,
-      timestamp: new Date().toISOString()
-    });
-    incident.updatedAt = new Date().toISOString();
-    this.storage.setData(data);
-    return incident;
+  addNote(id: string, note: Omit<IncidentNote, 'timestamp'>): Observable<Incident> {
+    return this.http.post<Incident>(`${API_BASE_URL}/incidents/${id}/notes`, note);
   }
 
-  toggleStatus(id: string): Incident | undefined {
-    const incident = this.getIncidentById(id);
-    if (!incident) {
-      return undefined;
-    }
-    return this.updateIncident(id, {
-      status: incident.status === 'Open' ? 'Closed' : 'Open'
-    });
+  toggleStatus(id: string, currentStatus: IncidentStatus): Observable<Incident> {
+    const action = currentStatus === 'Open' ? 'close' : 'reopen';
+    return this.http.post<Incident>(`${API_BASE_URL}/incidents/${id}/${action}`, {});
   }
 
-  deleteIncident(id: string): void {
-    const data = this.storage.getData();
-    data.incidents = data.incidents.filter((incident) => incident.id !== id);
-    this.storage.setData(data);
+  deleteIncident(id: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/incidents/${id}`);
   }
 }

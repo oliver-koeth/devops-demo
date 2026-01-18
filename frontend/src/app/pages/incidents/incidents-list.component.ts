@@ -41,8 +41,10 @@ export class IncidentsListComponent implements OnInit {
   }
 
   loadIncidents(): void {
-    this.incidents = this.incidentsService.getIncidents();
-    this.applyFilters();
+    this.incidentsService.getIncidents().subscribe((incidents) => {
+      this.incidents = incidents;
+      this.applyFilters();
+    });
   }
 
   applyFilters(): void {
@@ -62,20 +64,23 @@ export class IncidentsListComponent implements OnInit {
     if (!this.formState.title.trim() || !this.formState.service.trim()) {
       return;
     }
-    const incident = this.incidentsService.createIncident({
-      title: this.formState.title.trim(),
-      service: this.formState.service.trim(),
-      severity: this.formState.severity,
-      status: this.formState.status
-    });
-    this.formState = {
-      title: '',
-      service: '',
-      severity: 'P2',
-      status: 'Open'
-    };
-    this.loadIncidents();
-    void this.router.navigate(['/incidents', incident.id]);
+    this.incidentsService
+      .createIncident({
+        title: this.formState.title.trim(),
+        service: this.formState.service.trim(),
+        severity: this.formState.severity,
+        status: this.formState.status
+      })
+      .subscribe((incident) => {
+        this.formState = {
+          title: '',
+          service: '',
+          severity: 'P2',
+          status: 'Open'
+        };
+        this.loadIncidents();
+        void this.router.navigate(['/incidents', incident.id]);
+      });
   }
 
   resetFilters(): void {
@@ -90,7 +95,6 @@ export class IncidentsListComponent implements OnInit {
     if (!confirmDelete) {
       return;
     }
-    this.incidentsService.deleteIncident(id);
-    this.loadIncidents();
+    this.incidentsService.deleteIncident(id).subscribe(() => this.loadIncidents());
   }
 }

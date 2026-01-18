@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "devops-runbook-backend"
+version = "0.1.0"
+description = "FastAPI backend for the DevOps Runbook Assistant"
+authors = ["DevOps Demo"]
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+uvicorn = { version = "^0.30.0", extras = ["standard"] }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+httpx = "^0.27.0"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
