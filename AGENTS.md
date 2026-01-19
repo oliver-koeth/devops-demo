@@ -9,8 +9,10 @@ This repository is being built in **small, staged steps**. All contributors (inc
 - If unsure, add a short note to `docs/` rather than writing code.
 
 ## Stage Discipline
-- **Stage 3 (current)**: Angular frontend backed by a FastAPI service with file-based persistence.
-- Stage 4/5 will add an MCP server + ChatGPT-native integration.
+
+- **Stage 3**: Angular frontend backed by a FastAPI service with file-based persistence.
+- **Stage 4 (current)** will add an MCP server.
+- Stage 5 will add ChatGPT-native integration.
 - If a request conflicts with the current stage, flag it clearly and stop.
 
 ## Stage Extensions

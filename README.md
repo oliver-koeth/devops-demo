@@ -53,11 +53,16 @@ The MCP server runs as a separate Python process and calls the backend via HTTP.
 
 ```bash
 cd mcp
-python -m app.main
+
+export BACKEND_BASE_URL=http://localhost:8000
+export MCP_HOST=127.0.0.1
+export MCP_PORT=8090
+
+poetry install --no-root
+poetry run python -m app.main
 ```
 
-Environment variables:
-- `BACKEND_BASE_URL` (default: `http://localhost:8000`)
+The MCP Streamable HTTP endpoint will be available at `http://127.0.0.1:8090`.
 
 ### Typical Local Flow
 1. Start the backend.
@@ -67,9 +72,17 @@ Environment variables:
 ### MCP Integration Tests
 ```bash
 cd mcp
-pip install -e .[dev]
-pytest
+poetry install --no-root --extras dev
+poetry run pytest
 ```
+
+### MCP Inspector Tests
+```bash
+npx @modelcontextprotocol/inspector
+```
+
+Now configure the server in the MCP Inspector UI with the URL `http://localhost:8090/mcp``
+and the proxy token copied from the log of the MCP Inspector in the UI.
 
 ## Run the Frontend (Angular)
 ```bash
