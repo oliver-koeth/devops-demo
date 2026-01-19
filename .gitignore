@@ -18,6 +18,8 @@ node_modules/
 .venv/
 __pycache__/
 backend/.tmp/
+.pytest_cache/
+mcp/.venv/
 
 # Angular / Playwright
 frontend/node_modules/

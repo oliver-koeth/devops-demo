@@ -1,11 +1,12 @@
 import logging
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import health, incidents, runbooks
-from app.core.config import DEFAULT_STATE_PATH
+from app.core.config import DEFAULT_STATE_PATH, STATE_PATH_ENV
 from app.persistence.file_store import FileStateStore
 from app.seed.data import seed_state
 from app.services.incidents import IncidentService
@@ -16,7 +17,9 @@ def create_app(state_path: Path | None = None) -> FastAPI:
     logging.basicConfig(level=logging.INFO)
     app = FastAPI(title="DevOps Runbook Assistant API", version="1.0.0")
 
-    store = FileStateStore(path=state_path or DEFAULT_STATE_PATH, seed_provider=seed_state)
+    env_state_path = os.getenv(STATE_PATH_ENV)
+    resolved_state_path = state_path or (Path(env_state_path) if env_state_path else None)
+    store = FileStateStore(path=resolved_state_path or DEFAULT_STATE_PATH, seed_provider=seed_state)
     app.state.incident_service = IncidentService(store)
     app.state.runbook_service = RunbookService(store)
 

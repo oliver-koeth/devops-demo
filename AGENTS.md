@@ -17,6 +17,11 @@ This repository is being built in **small, staged steps**. All contributors (inc
 - For Stage 4+, avoid MCP work unless explicitly requested.
 - Prefer to extend documentation in `docs/` when uncertain.
 
+## Stage 4 MCP Conventions
+- MCP server must call the backend via HTTP API only (no in-process imports from backend services).
+- MCP tools are read-only in Stage 4.
+- Keep MCP tool schemas stable to support Stage 5 resources.
+
 ## Backend Conventions (Stage 3)
 - Keep routers thin; no direct file writes from API routes.
 - Use services + persistence abstractions for business logic.
