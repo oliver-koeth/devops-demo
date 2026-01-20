@@ -1,18 +1,28 @@
-# DevOps Runbook Assistant (Stage 4)
+# DevOps Runbook Assistant (Stage 5)
 
 ## Purpose
-This repository contains a staged demo application. Stage 4 adds a read-only MCP server alongside the existing Angular frontend and FastAPI backend to expose incidents and runbooks via MCP tools.
+This repository contains a staged demo application. Stage 5 expands the MCP server for ChatGPT-native integration with resources alongside the existing Angular frontend and FastAPI backend.
 
-## Current Scope (Stage 4)
+## Current Scope (Stage 5)
 - Angular frontend in `frontend/` using standalone components and Angular router.
 - FastAPI backend in `backend/` with file-based persistence and seed data.
-- MCP server in `mcp/` providing read-only tools for incidents and runbooks (see `docs/mcp-scope.md`).
+- MCP server in `mcp/` providing read-only tools and resources for incidents and runbooks (see `docs/mcp-scope.md`).
 - REST API under `/api/v1` with Swagger docs at `/docs` and OpenAPI JSON at `/openapi.json`.
 
 ## Out of Scope (Not Yet Implemented)
-- ChatGPT-native integration (Stage 5).
 - Authentication, authorization, or security hardening.
 - Deployment tooling.
+- Stage 6+ features beyond the current MCP resource scope.
+
+## Stage 5: ChatGPT-native MCP Resources
+Stage 5 adds MCP resources that mirror the tool surface so ChatGPT-native clients can discover
+and render incidents/runbooks via stable resource URIs. See `docs/mcp-scope.md` for the exact URI
+patterns and payload scope.
+
+High-level resource list:
+- Incident collection and item resources (`incidents://`, `incidents://{id}`).
+- Runbook collection and item resources (`runbooks://`, `runbooks://{id}`).
+- Filtered collection resources via query URIs (`incidents://?…`, `runbooks://?…`).
 
 ## Repository Structure
 - `frontend/` — Angular application (Stage 3 scope).
@@ -48,7 +58,7 @@ Test strategy:
 - **Unit tests** cover the services and file persistence layer (create/update/delete, filtering, status changes, state file writes).
 - **Integration tests** exercise the FastAPI routes end-to-end using `TestClient`.
 
-## Run the MCP Server (Stage 4)
+## Run the MCP Server (Stage 4/5)
 The MCP server runs as a separate Python process and calls the backend via HTTP.
 
 ```bash
@@ -81,8 +91,21 @@ poetry run pytest
 npx @modelcontextprotocol/inspector
 ```
 
-Now configure the server in the MCP Inspector UI with the URL `http://localhost:8090/mcp``
+Now configure the server in the MCP Inspector UI with the URL `http://localhost:8090/mcp`
 and the proxy token copied from the log of the MCP Inspector in the UI.
+
+### MCP Inspector (Stage 5 Resources)
+1. Start the backend and MCP server.
+2. Run the Inspector: `npx @modelcontextprotocol/inspector`.
+3. Select the **HTTP** transport and connect to `http://localhost:8090/mcp`.
+4. Open the **Resources** tab, refresh to see resource URIs, and read:
+   - `incidents://` or `runbooks://` for index resources.
+   - `incidents://{id}` or `runbooks://{id}` for item resources.
+   - Filtered URIs such as `incidents://?status=Open` or `runbooks://?tag=incident`.
+
+Limitations:
+- The Inspector validates resource discovery and payloads.
+- Final UI rendering behavior is validated in a ChatGPT client later.
 
 ## Run the Frontend (Angular)
 ```bash
