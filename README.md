@@ -6,7 +6,7 @@ This repository contains a staged demo application. Stage 4 adds a read-only MCP
 ## Current Scope (Stage 4)
 - Angular frontend in `frontend/` using standalone components and Angular router.
 - FastAPI backend in `backend/` with file-based persistence and seed data.
-- MCP server in `mcp/` providing read-only tools for incidents and runbooks.
+- MCP server in `mcp/` providing read-only tools for incidents and runbooks (see `docs/mcp-scope.md`).
 - REST API under `/api/v1` with Swagger docs at `/docs` and OpenAPI JSON at `/openapi.json`.
 
 ## Out of Scope (Not Yet Implemented)
