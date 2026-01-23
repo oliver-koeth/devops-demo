@@ -133,6 +133,15 @@ def _extract_payload(result):
     structured = getattr(result, "structured_content", None)
     if structured is not None:
         return structured
+    contents = getattr(result, "contents", None) or []
+    if contents:
+        first = contents[0]
+        text = getattr(first, "text", None)
+        if text:
+            try:
+                return json.loads(text)
+            except json.JSONDecodeError:
+                return text
     content = getattr(result, "content", None) or []
     if content:
         first = content[0]
@@ -151,6 +160,68 @@ def _as_dict(item):
     if hasattr(item, "dict"):
         return item.dict()
     return item
+
+
+@pytest.mark.asyncio
+async def test_resources_list_contains_expected_entries(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        list_result = await session.list_resources()
+        resources = list_result.resources
+        uris = {str(resource.uri) for resource in resources}
+        assert "incidents://" in uris
+        assert "runbooks://" in uris
+
+        templates_result = await session.list_resource_templates()
+        templates = templates_result.resourceTemplates
+        templates_by_uri = {template.uriTemplate for template in templates}
+        assert "incidents://{incident_id}" in templates_by_uri
+        assert "runbooks://{runbook_id}" in templates_by_uri
+        assert "incidents://?{query}" in templates_by_uri
+        assert "runbooks://?{query}" in templates_by_uri
+
+
+@pytest.mark.asyncio
+async def test_can_read_index_resource(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        incidents_result = await session.read_resource("incidents://")
+        incidents_payload = _extract_payload(incidents_result)
+        assert isinstance(incidents_payload, list)
+        assert len(incidents_payload) >= 2
+        assert "id" in _as_dict(incidents_payload[0])
+
+        runbooks_result = await session.read_resource("runbooks://")
+        runbooks_payload = _extract_payload(runbooks_result)
+        assert isinstance(runbooks_payload, list)
+        assert len(runbooks_payload) >= 2
+        assert "id" in _as_dict(runbooks_payload[0])
+
+
+@pytest.mark.asyncio
+async def test_can_read_detail_resources_for_seeded_entities(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        list_incidents_result = await session.call_tool("list_incidents", {})
+        incidents = [_as_dict(item) for item in _extract_payload(list_incidents_result)]
+        incident_id = incidents[0]["id"]
+
+        incident_result = await session.read_resource(f"incidents://{incident_id}")
+        incident_payload = _as_dict(_extract_payload(incident_result))
+        assert incident_payload["id"] == incident_id
+
+        list_runbooks_result = await session.call_tool("list_runbooks", {})
+        runbooks = [_as_dict(item) for item in _extract_payload(list_runbooks_result)]
+        runbook_id = runbooks[0]["id"]
+
+        runbook_result = await session.read_resource(f"runbooks://{runbook_id}")
+        runbook_payload = _as_dict(_extract_payload(runbook_result))
+        assert runbook_payload["id"] == runbook_id
+
+
+@pytest.mark.asyncio
+async def test_resource_not_found_error(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        with pytest.raises(Exception) as excinfo:
+            await session.read_resource("incidents://missing-id")
+        assert "not found" in str(excinfo.value).lower()
 
 
 @pytest.mark.asyncio
@@ -211,4 +282,15 @@ async def test_backend_unavailable_returns_error() -> None:
         async with _mcp_session(base_url) as session:
             with pytest.raises(Exception) as excinfo:
                 await session.call_tool("list_incidents", {})
+            assert "backend unavailable" in str(excinfo.value).lower()
+
+
+@pytest.mark.asyncio
+async def test_backend_unavailable_returns_error_for_resources() -> None:
+    unavailable_port = _find_free_port()
+    backend_url = f"http://127.0.0.1:{unavailable_port}"
+    with _mcp_server(backend_url) as base_url:
+        async with _mcp_session(base_url) as session:
+            with pytest.raises(Exception) as excinfo:
+                await session.read_resource("incidents://")
             assert "backend unavailable" in str(excinfo.value).lower()

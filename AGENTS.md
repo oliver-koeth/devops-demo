@@ -19,6 +19,11 @@ This repository is being built in **small, staged steps**. All contributors (inc
 - For Stage 4+, avoid MCP work unless explicitly requested.
 - Prefer to extend documentation in `docs/` when uncertain.
 
+## Stage 5 Conventions
+- Resource URIs and payloads are a contract; avoid breaking changes.
+- New resources must be documented and tested.
+- Keep the HTTP boundary: MCP -> backend API only.
+
 ## Stage 4 MCP Conventions
 - MCP server must call the backend via HTTP API only (no in-process imports from backend services).
 - MCP tools are read-only in Stage 4.
