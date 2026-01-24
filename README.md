@@ -14,15 +14,19 @@ This repository contains a staged demo application. Stage 5 expands the MCP serv
 - Deployment tooling.
 - Stage 6+ features beyond the current MCP resource scope.
 
-## Stage 5: ChatGPT-native MCP Resources
-Stage 5 adds MCP resources that mirror the tool surface so ChatGPT-native clients can discover
-and render incidents/runbooks via stable resource URIs. See `docs/mcp-scope.md` for the exact URI
-patterns and payload scope.
+## Stage 5: ChatGPT App Integration
+Stage 5 introduces ChatGPT App widgets, defined as HTML templates exposed via MCP resources.
+Each widget has a corresponding tool that fetches backend data and returns structured content
+so ChatGPT can render a custom UI.
 
-High-level resource list:
-- Incident collection and item resources (`incidents://`, `incidents://{id}`).
-- Runbook collection and item resources (`runbooks://`, `runbooks://{id}`).
-- Filtered collection resources via query URIs (`incidents://?…`, `runbooks://?…`).
+Widget resources:
+- Incident list widget (`ui://widget/incident-list.html`)
+- Incident detail widget (`ui://widget/incident-detail.html`)
+- Runbook list widget (`ui://widget/runbook-list.html`)
+- Runbook detail widget (`ui://widget/runbook-detail.html`)
+
+The Stage 4 resource model remains in place for non-widget discovery. See `docs/mcp-scope.md`
+for the exact incident/runbook resource URIs and payload scope.
 
 ## Repository Structure
 - `frontend/` — Angular application (Stage 3 scope).
@@ -86,6 +90,15 @@ poetry install --no-root --extras dev
 poetry run pytest
 ```
 
+### ChatGPT App (Developer Mode)
+1. Start the backend and MCP server.
+2. (Optional) Run the MCP Inspector to verify tools/resources.
+3. In ChatGPT Developer Mode, create a new app and point to:
+   - MCP Server URL: `https://YOUR_PUBLIC_URL/mcp`
+   - Auth: none
+4. When calling widget tools, ChatGPT fetches the widget HTML via MCP resources and renders
+   the UI directly inside the chat experience.
+
 ### MCP Inspector Tests
 ```bash
 npx @modelcontextprotocol/inspector
@@ -130,5 +143,5 @@ npm run test
 ```
 
 ## Staged Development Notes
-- Stage 5 will add ChatGPT-native integration.
+- Stage 5 adds ChatGPT-native integration with widget resources and widget tools.
 - Keep changes incremental and avoid implementing future-stage features early.
