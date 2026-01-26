@@ -30,7 +30,7 @@ def _widget_response_text(widget: Widget, **kwargs: str) -> str:
 
 def _widget_result(widget: Widget, text: str, structured: dict) -> CallToolResult:
     return CallToolResult(
-        content=[TextContent(text=text)],
+        content=[TextContent(type="text", text=text)],
         structuredContent=structured,
         _meta=widget_meta(widget),
     )

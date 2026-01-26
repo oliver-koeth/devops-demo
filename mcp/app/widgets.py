@@ -46,7 +46,9 @@ def _build_list_html(root_id: str, title: str, item_label: str) -> str:
 </style>
 <script>
   (function () {{
-    const data = window.__MCP_STRUCTURED_DATA__ || {{}};
+    console.debug("Global data:", window.openai);
+    const data = window.openai.toolOutput;
+    console.debug("Widget data:", data);
     const items = data.items || [];
     const root = document.getElementById("{root_id}");
     if (!root) return;
@@ -81,8 +83,10 @@ def _build_detail_html(root_id: str, title: str, empty_label: str) -> str:
   .widget-body {{ background: #f7f7f7; padding: 8px; border-radius: 6px; white-space: pre-wrap; }}
 </style>
 <script>
+
   (function () {{
-    const data = window.__MCP_STRUCTURED_DATA__ || {{}};
+    const data = window.openai.toolOutput;
+    console.debug("Widget data:", data);
     const item = data.item;
     const root = document.getElementById("{root_id}");
     if (!root) return;
@@ -96,7 +100,6 @@ def _build_detail_html(root_id: str, title: str, empty_label: str) -> str:
   }})();
 </script>
 """.strip()
-
 
 WIDGETS: list[Widget] = [
     Widget(
