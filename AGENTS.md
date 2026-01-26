@@ -23,6 +23,8 @@ This repository is being built in **small, staged steps**. All contributors (inc
 - Resource URIs and payloads are a contract; avoid breaking changes.
 - New resources must be documented and tested.
 - Keep the HTTP boundary: MCP -> backend API only.
+- Widgets must be defined in a single registry to keep tool/resource metadata consistent.
+- Any widget contract change requires updating code, tests, and documentation together.
 
 ## Stage 4 MCP Conventions
 - MCP server must call the backend via HTTP API only (no in-process imports from backend services).

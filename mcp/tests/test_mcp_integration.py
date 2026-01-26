@@ -15,6 +15,9 @@ from mcp.client.streamable_http import streamable_http_client
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_DIR = REPO_ROOT / "backend"
 MCP_DIR = REPO_ROOT / "mcp"
+sys.path.insert(0, str(MCP_DIR))
+
+from app.widgets import WIDGETS, widget_meta  # noqa: E402
 
 
 def _find_free_port() -> int:
@@ -170,6 +173,8 @@ async def test_resources_list_contains_expected_entries(mcp_url: str) -> None:
         uris = {str(resource.uri) for resource in resources}
         assert "incidents://" in uris
         assert "runbooks://" in uris
+        for widget in WIDGETS:
+            assert widget.template_uri in uris
 
         templates_result = await session.list_resource_templates()
         templates = templates_result.resourceTemplates
@@ -294,3 +299,71 @@ async def test_backend_unavailable_returns_error_for_resources() -> None:
             with pytest.raises(Exception) as excinfo:
                 await session.read_resource("incidents://")
             assert "backend unavailable" in str(excinfo.value).lower()
+
+
+@pytest.mark.asyncio
+async def test_resources_expose_widget_templates(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        list_result = await session.list_resources()
+        resources = {str(resource.uri): resource for resource in list_result.resources}
+        for widget in WIDGETS:
+            resource = resources[widget.template_uri]
+            assert resource.mimeType == "text/html+skybridge"
+            assert resource.description
+
+        widget = WIDGETS[0]
+        read_result = await session.read_resource(widget.template_uri)
+        contents = read_result.contents
+        assert contents
+        assert contents[0].text
+        assert widget.root_id in contents[0].text
+        assert contents[0].meta == widget_meta(widget)
+
+
+@pytest.mark.asyncio
+async def test_tools_link_to_widgets(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        list_incidents_result = await session.call_tool("list_incidents", {})
+        incidents = [_as_dict(item) for item in _extract_payload(list_incidents_result)]
+        incident_id = incidents[0]["id"]
+
+        list_runbooks_result = await session.call_tool("list_runbooks", {})
+        runbooks = [_as_dict(item) for item in _extract_payload(list_runbooks_result)]
+        runbook_id = runbooks[0]["id"]
+
+        widget_calls = [
+            ("incident_list_widget", {}),
+            ("incident_detail_widget", {"incident_id": incident_id}),
+            ("runbook_list_widget", {}),
+            ("runbook_detail_widget", {"runbook_id": runbook_id}),
+        ]
+        for widget_name, args in widget_calls:
+            result = await session.call_tool(widget_name, args)
+            assert result.content
+            assert isinstance(result.content[0].text, str)
+            assert result.structuredContent
+            assert result.meta
+            assert result.meta["openai/outputTemplate"]
+
+
+@pytest.mark.asyncio
+async def test_widget_meta_consistency(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        list_result = await session.list_resources()
+        resources = {str(resource.uri): resource for resource in list_result.resources}
+        tools_result = await session.list_tools()
+        tools = {tool.name: tool for tool in tools_result.tools}
+        for widget in WIDGETS:
+            resource_meta = resources[widget.template_uri].meta
+            tool_meta = tools[widget.id].meta
+            assert resource_meta
+            assert tool_meta
+            assert resource_meta == tool_meta == widget_meta(widget)
+
+
+@pytest.mark.asyncio
+async def test_widget_error_handling(mcp_url: str) -> None:
+    async with _mcp_session(mcp_url) as session:
+        with pytest.raises(Exception) as excinfo:
+            await session.call_tool("incident_detail_widget", {"incident_id": "missing-id"})
+        assert "not found" in str(excinfo.value).lower()

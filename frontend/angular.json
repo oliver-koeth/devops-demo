@@ -48,5 +48,8 @@
       }
     }
   },
-  "defaultProject": "devops-runbook-assistant"
+  "defaultProject": "devops-runbook-assistant",
+  "cli": {
+    "analytics": false
+  }
 }

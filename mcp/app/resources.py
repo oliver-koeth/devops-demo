@@ -7,6 +7,7 @@ from mcp.server.fastmcp import FastMCP
 
 from app.client import BackendClient, BackendNotFoundError, BackendUnavailableError
 from app.models import Incident, Runbook
+from app.widgets import WIDGETS, WidgetResource, widget_meta
 
 
 def _clean_params(**kwargs: str | None) -> dict[str, str]:
@@ -140,3 +141,15 @@ def register_resources(mcp: FastMCP, client: BackendClient) -> None:
         except BackendUnavailableError as exc:
             raise RuntimeError("backend unavailable") from exc
         return _map_item(data, Runbook)
+
+    for widget in WIDGETS:
+        resource = WidgetResource(
+            uri=widget.template_uri,
+            name=widget.title,
+            title=widget.title,
+            description=f"HTML markup for the {widget.title} widget.",
+            mime_type="text/html+skybridge",
+            text=widget.html,
+            meta=widget_meta(widget),
+        )
+        mcp.add_resource(resource)

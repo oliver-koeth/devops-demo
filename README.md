@@ -14,15 +14,19 @@ This repository contains a staged demo application. Stage 5 expands the MCP serv
 - Deployment tooling.
 - Stage 6+ features beyond the current MCP resource scope.
 
-## Stage 5: ChatGPT-native MCP Resources
-Stage 5 adds MCP resources that mirror the tool surface so ChatGPT-native clients can discover
-and render incidents/runbooks via stable resource URIs. See `docs/mcp-scope.md` for the exact URI
-patterns and payload scope.
+## Stage 5: ChatGPT App Integration
+Stage 5 introduces ChatGPT App widgets, defined as HTML templates exposed via MCP resources.
+Each widget has a corresponding tool that fetches backend data and returns structured content
+so ChatGPT can render a custom UI.
 
-High-level resource list:
-- Incident collection and item resources (`incidents://`, `incidents://{id}`).
-- Runbook collection and item resources (`runbooks://`, `runbooks://{id}`).
-- Filtered collection resources via query URIs (`incidents://?…`, `runbooks://?…`).
+Widget resources:
+- Incident list widget (`ui://widget/incident-list.html`)
+- Incident detail widget (`ui://widget/incident-detail.html`)
+- Runbook list widget (`ui://widget/runbook-list.html`)
+- Runbook detail widget (`ui://widget/runbook-detail.html`)
+
+The Stage 4 resource model remains in place for non-widget discovery. See `docs/mcp-scope.md`
+for the exact incident/runbook resource URIs and payload scope.
 
 ## Repository Structure
 - `frontend/` — Angular application (Stage 3 scope).
@@ -74,9 +78,19 @@ poetry run python -m app.main
 
 The MCP Streamable HTTP endpoint will be available at `http://127.0.0.1:8090`.
 
+In case you want to test from ChatGPT client, start ngrok to expose
+local MCP server to internet. Make sure the env variable `NGROK_AUTHTOKEN` is set.
+As this token does not change frequently you can include it in your `.zshrc` or
+equivalent.
+
+```bash
+ngrok http 8090
+```
+
 ### Typical Local Flow
 1. Start the backend.
 2. Start the MCP server.
+2. Optinally start ngrok.
 3. Optionally run the frontend.
 
 ### MCP Integration Tests
@@ -86,13 +100,24 @@ poetry install --no-root --extras dev
 poetry run pytest
 ```
 
+### ChatGPT App (Developer Mode)
+1. Start the backend and MCP server.
+2. (Optional) Run the MCP Inspector to verify tools/resources (see below).
+3. In ChatGPT Developer Mode, create a new app and point to:
+   - MCP Server URL: `https://YOUR_PUBLIC_URL/mcp`
+   - Auth: none
+4. When calling widget tools, ChatGPT fetches the widget HTML via MCP 
+   resources and renders the UI directly inside the chat experience.
+
 ### MCP Inspector Tests
 ```bash
 npx @modelcontextprotocol/inspector
 ```
 
-Now configure the server in the MCP Inspector UI with the URL `http://localhost:8090/mcp`
-and the proxy token copied from the log of the MCP Inspector in the UI.
+Now configure the server in the MCP Inspector UI with the URL 
+`http://localhost:8090/mcp` or when using ngrok you can also use the ngrok URL 
+`https://<generated>.ngrok-free.dev/mcp` Do not forget to copy the session proxy token
+from the log of the MCP Inspector in the UI.
 
 ### MCP Inspector (Stage 5 Resources)
 1. Start the backend and MCP server.
@@ -113,7 +138,8 @@ cd frontend
 npm install
 npm run start
 ```
-The dev server will be available at `http://localhost:4200` and will call the backend at `http://localhost:8000/api/v1`.
+The dev server will be available at `http://localhost:4200` and will 
+call the backend at `http://localhost:8000/api/v1`.
 
 ## Build Production Bundle
 ```bash
@@ -130,5 +156,5 @@ npm run test
 ```
 
 ## Staged Development Notes
-- Stage 5 will add ChatGPT-native integration.
+- Stage 5 adds ChatGPT-native integration with widget resources and widget tools.
 - Keep changes incremental and avoid implementing future-stage features early.
