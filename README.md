@@ -30,7 +30,6 @@ The MCP server has been developed with [this prompt](./docs/prompt_stage_4.md). 
 - `docs/` — Architecture notes, prompts and demo scripts.
 
 The instructions on how to run the components can be found in the `README.md` files of the repective subfolders:
-- 
 
 ## Staged Development Approach
 
